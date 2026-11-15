@@ -24,6 +24,9 @@ export const invitation = {
   // 배경음악 (public 기준 경로). 인트로를 탭하면 재생된다
   bgm: "/sheluvme.MP3",
 
+  // 커버 사진들 (public 기준 경로). 적은 순서대로 3초마다 페이드되며 바뀐다
+  coverPhotos: ["/images/1.png", "/images/2.png"],
+
   // 인사말 아래 사진 (public 기준 경로)
   invitationPhoto: "/images/invitation.jpg",
 

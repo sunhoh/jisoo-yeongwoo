@@ -150,6 +150,7 @@ export function createFluid({ canvas, content, area, drawContent }: Options) {
   const contentTexture = new THREE.CanvasTexture(content);
   contentTexture.minFilter = THREE.LinearFilter;
   contentTexture.generateMipmaps = false;
+  const contentSize = { w: content.width, h: content.height };
 
   const velocity = new THREE.ShaderMaterial({
     vertexShader: VERT,
@@ -208,6 +209,8 @@ export function createFluid({ canvas, content, area, drawContent }: Options) {
   };
   window.addEventListener("pointermove", onMove, { passive: true });
   window.addEventListener("pointerup", onLeave, { passive: true });
+  // 폰에서 브라우저가 제스처를 가져가면 손가락을 뗀 것으로 본다
+  window.addEventListener("pointercancel", onLeave, { passive: true });
   document.documentElement.addEventListener("pointerleave", onLeave);
 
   // ---------- size ----------
@@ -265,7 +268,16 @@ export function createFluid({ canvas, content, area, drawContent }: Options) {
     pass(velocity, write);
     [read, write] = [write, read];
 
-    if (drawContent()) contentTexture.needsUpdate = true;
+    if (drawContent()) {
+      // three.js는 텍스처를 처음 크기로 고정해 GPU에 잡아둔다(texStorage2D).
+      // 창 폭이 바뀌어 그림 크기가 달라지면 버리고 새 크기로 다시 잡아야 늘어나거나 잘리지 않는다.
+      if (content.width !== contentSize.w || content.height !== contentSize.h) {
+        contentTexture.dispose();
+        contentSize.w = content.width;
+        contentSize.h = content.height;
+      }
+      contentTexture.needsUpdate = true;
+    }
     display.uniforms.uVel.value = read.texture;
     pass(display, null);
 
@@ -298,6 +310,7 @@ export function createFluid({ canvas, content, area, drawContent }: Options) {
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerup", onLeave);
+    window.removeEventListener("pointercancel", onLeave);
     document.documentElement.removeEventListener("pointerleave", onLeave);
     read.dispose();
     write.dispose();

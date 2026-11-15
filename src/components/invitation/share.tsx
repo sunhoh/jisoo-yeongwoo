@@ -84,7 +84,7 @@ function ShareItem({
   return (
     <button
       type="button"
-      className="type-body-sm flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-ink transition-colors focus:outline-none active:bg-mist disabled:opacity-40"
+      className="type-body-sm flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-ink transition-colors focus:outline-none active:bg-mist disabled:opacity-40"
       {...props}
     >
       <span className="flex size-4 items-center justify-center">{icon}</span>

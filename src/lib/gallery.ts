@@ -16,13 +16,18 @@ const IMAGE_EXT = /\.(jpe?g|png|webp|avif)$/i;
 async function toImage(src: string): Promise<GalleryImage> {
   const buffer = await fs.readFile(path.join(process.cwd(), "public", src));
   const { base64, metadata } = await getPlaiceholder(buffer, { size: 12 });
-  return { src, width: metadata.width, height: metadata.height, blurDataURL: base64 };
+  return {
+    src,
+    width: metadata.width,
+    height: metadata.height,
+    blurDataURL: base64,
+  };
 }
 
-/** public 아래 사진 한 장의 크기와 블러 미리보기 (예: "/images/invitation.jpg") */
-export async function getImage(src: string): Promise<GalleryImage> {
+/** public 아래 사진들의 크기와 블러 미리보기 (예: ["/images/1.png", "/images/2.png"]) */
+export async function getImages(srcs: string[]): Promise<GalleryImage[]> {
   "use cache";
-  return toImage(src);
+  return Promise.all(srcs.map(toImage));
 }
 
 /**

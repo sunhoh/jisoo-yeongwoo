@@ -24,9 +24,10 @@ export function DateMonogram({ date, className }: { date: string; className?: st
         </span>
       </div>
       <span className="mt-5 font-serif text-[15px] font-medium tracking-[0.08em] text-ink lining-nums">
-        {year}
+        {/* {year} */}
         <span aria-hidden className="mx-2.5 text-ink-faint">·</span>
         {time}
+        <span aria-hidden className="mx-2.5 text-ink-faint">·</span>
       </span>
     </div>
   );

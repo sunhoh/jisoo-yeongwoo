@@ -4,7 +4,8 @@
  */
 export function Signature({ children }: { children: string }) {
   return (
-    <div aria-hidden className="@container overflow-hidden select-none">
+    // data-no-blur: 이 영역이 화면에 들어오면 아래쪽 그라데이션 블러를 걷는다 (gradual-blur.tsx)
+    <div aria-hidden data-no-blur className="@container overflow-hidden select-none">
       <p className="font-script text-[16cqw] leading-[1.1] tracking-[-0.01em] whitespace-nowrap text-center text-[#e2e2e0] translate-y-[24%] -mt-[4%]">
         {children}
       </p>

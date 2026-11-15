@@ -78,7 +78,7 @@ export function Gallery({ images }: { images: GalleryImage[] }) {
   );
 }
 
-function GalleryViewer({
+export function GalleryViewer({
   images,
   index,
   onIndexChange,

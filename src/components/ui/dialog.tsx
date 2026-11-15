@@ -27,7 +27,7 @@ export function DialogContent({
       <DialogPrimitive.Content
         className={cn(
           "fixed top-1/2 left-1/2 z-50 w-10/12 max-w-[500px] -translate-x-1/2 -translate-y-1/2",
-          "border border-line bg-paper px-6 pt-8 pb-6 shadow-[0_20px_60px_-20px_rgb(17_17_17/0.25)]",
+          "rounded-xl border border-line bg-paper px-6 pt-8 pb-6 shadow-[0_20px_60px_-20px_rgb(17_17_17/0.25)]",
           "duration-300 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98]",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.98]",
           className,

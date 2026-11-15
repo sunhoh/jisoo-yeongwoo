@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Star3D } from "@/components/ui/star-3d";
 import { startBgm } from "./bgm";
 import { FluidLayer } from "./fluid-layer";
+import { StudioLight } from "./studio-light";
 import { requestMotionPermission } from "@/lib/tilt";
 import { cn } from "@/lib/utils";
 
@@ -71,15 +72,22 @@ export function Intro({ names, date }: { names: string; date: string }) {
       aria-label="청첩장 열기"
       onClick={() => open(true)}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && open(true)}
+      // 폰에서 손가락으로 끌 때 브라우저가 스크롤 제스처로 가로채지 않게 해서 일렁임이 손가락을 따라가게 한다.
+      // (인트로는 원래 스크롤이 없는 화면이라 잃는 동작이 없다)
+      style={{ touchAction: "none" }}
       className={cn(
         "fixed inset-0 z-[70] flex cursor-pointer flex-col items-center justify-center bg-paper outline-none select-none",
         "transition-[opacity,filter,transform] duration-[1100ms] ease-soft",
         // JS가 아예 안 붙어 탭을 받을 수 없을 때만 12초 뒤 CSS로 사라진다
         "not-data-ready:animate-intro-failsafe",
-        phase === "leave" && "pointer-events-none scale-[1.03] opacity-0 blur-md",
+        phase === "leave" &&
+          "pointer-events-none scale-[1.03] opacity-0 blur-md",
       )}
     >
       <FluidLayer background="#ffffff" />
+
+      {/* 조명이 떨어지는 스튜디오 공간 */}
+      <StudioLight />
 
       {/* 일렁임이 켜지면 아래 요소들은 캔버스가 대신 그리고, 원래 요소는 화면에서만 숨긴다 */}
       <div

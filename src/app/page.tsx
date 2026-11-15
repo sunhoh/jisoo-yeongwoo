@@ -1,8 +1,10 @@
+import Image from "next/image";
 import { AccountAccordion } from "@/components/invitation/account-accordion";
 import { Bgm } from "@/components/invitation/bgm";
-import Image from "next/image";
 import { ContactDialog } from "@/components/invitation/contact-dialog";
+import { CoverSlideshow } from "@/components/invitation/cover-slideshow";
 import { DateMonogram } from "@/components/invitation/date-monogram";
+import { DevEasterEggs } from "@/components/invitation/dev-easter-eggs";
 import { FamilyNames } from "@/components/invitation/family-names";
 import { Intro } from "@/components/invitation/intro";
 import { Gallery } from "@/components/invitation/gallery";
@@ -11,19 +13,21 @@ import { NaverMap } from "@/components/invitation/naver-map";
 import { Share } from "@/components/invitation/share";
 import { TransportList, VenueInfo } from "@/components/invitation/venue-info";
 import { WeddingCalendar } from "@/components/invitation/wedding-calendar";
+import { GradualBlur } from "@/components/ui/gradual-blur";
 import { Reveal } from "@/components/ui/reveal";
 import { Signature } from "@/components/ui/signature";
 import { CaptionRow, Rule, SectionHeading } from "@/components/ui/typography";
 import { invitation } from "@/config/invitation";
 import { coverDate } from "@/lib/date";
-import { getGalleryImages, getImage } from "@/lib/gallery";
+import { getGalleryImages, getImages } from "@/lib/gallery";
 
 const { groom, bride, venue, accounts, contacts } = invitation;
 
 export default async function Home() {
-  const [gallery, photo] = await Promise.all([
+  const [gallery, coverPhotos, [photo]] = await Promise.all([
     getGalleryImages(),
-    getImage(invitation.invitationPhoto),
+    getImages(invitation.coverPhotos),
+    getImages([invitation.invitationPhoto]),
   ]);
   const { date, time } = coverDate(invitation.date);
 
@@ -31,12 +35,31 @@ export default async function Home() {
     <>
       <Intro names={`${bride.en} & ${groom.en}`} date={date} />
       <Bgm src={invitation.bgm} />
-      {/* 커버 */}
-      <section className="relative flex h-dvh max-h-[860px] min-h-[640px] flex-col bg-gradient-to-b from-[#e9e9e7] via-[#d6d6d3] to-paper px-5 pt-4 pb-6">
-        <CaptionRow left={bride.en} right={groom.en} className="[&>span]:normal-case" />
+      {/* 화면 위아래 가장자리 그라데이션 블러 */}
+      <GradualBlur />
+      {/* 커버: 사진들이 3초마다 페이드되며 바뀌고, 글자는 사진 위에 흰색으로 */}
+      <section className="relative flex h-dvh max-h-[860px] min-h-[640px] flex-col bg-ink px-5 pt-4 pb-6 text-paper">
+        <CoverSlideshow photos={coverPhotos} />
+        {/* 위아래 캡션과 가운데 타이틀이 사진 위에서 읽히도록 은은한 그늘 */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgb(0 0 0 / 0.35), rgb(0 0 0 / 0) 22%, rgb(0 0 0 / 0.12) 50%, rgb(0 0 0 / 0) 72%, rgb(0 0 0 / 0.4))",
+          }}
+        />
 
-        <div className="flex flex-1 flex-col items-center justify-center text-center">
-          <span className="type-meta mb-6">사진 자리 · 흑백 웨딩 사진</span>
+        <CaptionRow
+          left={bride.en}
+          right={groom.en}
+          className="relative [&>span]:normal-case"
+        />
+
+        <div
+          className="relative flex flex-1 flex-col items-center justify-center text-center"
+          style={{ textShadow: "0 1px 12px rgb(0 0 0 / 0.35)" }}
+        >
           {/* 오프닝이 걷힌 뒤에 등장 */}
           <h1 className="type-display opacity-0 opened:animate-in opened:fade-in opened:slide-in-from-bottom-6 opened:opacity-100 opened:fill-mode-both opened:[animation-delay:400ms] opened:[animation-duration:1600ms]">
             Our First Page
@@ -46,7 +69,12 @@ export default async function Home() {
           </p>
         </div>
 
-        <CaptionRow left={date} center="With Love" right={time} />
+        <CaptionRow
+          left={date}
+          center="With Love"
+          right={time}
+          className="relative"
+        />
       </section>
 
       {/* wedding-invitation 기준: 본문 좌우 패딩 없이 사진·지도·갤러리는 폭을 꽉 채우고, 목록만 mx-8 */}
@@ -64,12 +92,16 @@ export default async function Home() {
           </Reveal>
           <Reveal delay={300} className="mt-14 space-y-6 text-center">
             {invitation.greeting.split("\n\n").map((paragraph) => (
-              <p key={paragraph} className="type-body whitespace-pre-line text-stone">
+              <p
+                key={paragraph}
+                className="type-body whitespace-pre-line text-stone"
+              >
                 {paragraph}
               </p>
             ))}
           </Reveal>
 
+          {/* 인사말 아래 사진 */}
           <Reveal className="mt-16">
             <Image
               src={photo.src}
@@ -79,7 +111,7 @@ export default async function Home() {
               sizes="(max-width: 600px) 100vw, 600px"
               placeholder="blur"
               blurDataURL={photo.blurDataURL}
-              className="w-full"
+              className="block w-full"
             />
           </Reveal>
 
@@ -96,7 +128,9 @@ export default async function Home() {
         <section>
           <Reveal className="mb-10">
             <SectionHeading>Wedding Gallery</SectionHeading>
-            <p className="type-meta mt-2 text-center">사진을 누르면 크게 볼 수 있어요</p>
+            <p className="type-meta mt-2 text-center">
+              사진을 누르면 크게 볼 수 있어요
+            </p>
           </Reveal>
           <Gallery images={gallery} />
         </section>
@@ -156,6 +190,13 @@ export default async function Home() {
           Jisoo &amp; Yeongwoo · Thank you
         </p>
       </div>
+
+      {/* 개발자용 숨은 장치: 위아래로 더 당기면 <wedding> 태그와 크레딧, 콘솔 인사말 */}
+      <DevEasterEggs
+        bride={bride.en}
+        groom={groom.en}
+        date={invitation.date.slice(0, 10)}
+      />
 
       <Signature>jisoo &amp; yeongwoo.</Signature>
     </>

@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
  * 부모 안의 표시된 요소를 매 프레임 읽어 2D 캔버스에 똑같이 그리고, 그 그림을 유체 셰이더로 굴절시킨다.
  * - [data-fluid-text]: 글자. 위치·글꼴·자간·대소문자·투명도(조상 포함)·clip-path(inset)를 따라간다.
  *   색은 data-fluid-color (기본 #111111)
- * - [data-fluid-image]: 안에 있는 <canvas>(예: 3D 별)를 그 자리에 그대로 찍는다.
+ * - [data-fluid-image]: <img>·<canvas> 자체, 또는 안에 있는 <canvas>(예: 3D 별)를 그 자리에 그대로 찍는다.
  * 부모에 data-fluid 가 붙으면 원래 요소는 화면에서만 숨긴다(레이아웃·애니메이션·스크린리더 유지).
  * 모션 줄이기, WebGL 미지원이면 아무것도 하지 않아 원래 HTML이 보인다.
  */
@@ -91,9 +91,13 @@ export function FluidLayer({ background = "#ffffff" }: { background?: string }) 
       ctx.fillRect(0, 0, area_.width, area_.height);
 
       for (const el of images) {
-        const img = el.querySelector("canvas");
+        const img =
+          el instanceof HTMLImageElement || el instanceof HTMLCanvasElement
+            ? el
+            : el.querySelector("canvas");
         const opacity = opacityOf(el);
-        if (!img || img.width === 0 || opacity <= 0.001) continue;
+        const ready = img instanceof HTMLImageElement ? img.complete && img.naturalWidth > 0 : !!img && img.width > 0;
+        if (!img || !ready || opacity <= 0.001) continue;
         const r = el.getBoundingClientRect();
         ctx.globalAlpha = opacity;
         ctx.drawImage(img, r.left - area_.left, r.top - area_.top, r.width, r.height);
