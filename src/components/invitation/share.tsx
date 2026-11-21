@@ -5,7 +5,11 @@ import { useState } from "react";
 import { invitation } from "@/config/invitation";
 import { Button } from "@/components/ui/button";
 import { KakaoIcon, LinkIcon, ShareIcon } from "@/components/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { copy } from "@/lib/copy";
 
 const KAKAO_KEY = process.env.NEXT_PUBLIC_KAKAO_JS_KEY;
@@ -18,7 +22,11 @@ declare global {
 }
 
 /** 공유하기 — 링크 복사 / 카카오톡 공유 */
-export function Share({ share = invitation.share }: { share?: typeof invitation.share }) {
+export function Share({
+  share = invitation.share,
+}: {
+  share?: typeof invitation.share;
+}) {
   const [open, setOpen] = useState(false);
 
   const onCopy = () => {
@@ -60,7 +68,10 @@ export function Share({ share = invitation.share }: { share?: typeof invitation.
           </Button>
         </PopoverTrigger>
         <PopoverContent side="top" className="w-48">
-          <ShareItem onClick={onCopy} icon={<LinkIcon className="text-ink-soft" />}>
+          <ShareItem
+            onClick={onCopy}
+            icon={<LinkIcon className="text-ink-soft" />}
+          >
             링크 복사하기
           </ShareItem>
           <ShareItem

@@ -5,8 +5,18 @@ import { cn } from "@/lib/utils";
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 /** 한국 시간 기준 연·월·일 */
@@ -24,7 +34,13 @@ function seoulYmd(iso: string) {
 }
 
 /** 예식 달 달력 + 남은 날짜 + 실시간 카운트다운 */
-export function WeddingCalendar({ date, className }: { date: string; className?: string }) {
+export function WeddingCalendar({
+  date,
+  className,
+}: {
+  date: string;
+  className?: string;
+}) {
   const { year, month, day } = seoulYmd(date);
   const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -84,7 +100,8 @@ function Countdown({ date }: { date: string }) {
     return () => clearInterval(id);
   }, []);
 
-  const remaining = now === null ? null : Math.max(0, new Date(date).getTime() - now);
+  const remaining =
+    now === null ? null : Math.max(0, new Date(date).getTime() - now);
   // 일·시·분·초로 쪼개기: 각 단위는 바로 위 단위로 나눈 나머지
   const values = UNITS.map(({ ms }, i) => {
     const total = remaining ?? 0;
@@ -110,7 +127,11 @@ function Countdown({ date }: { date: string }) {
         {UNITS.map(({ label }, i) => (
           <div key={label}>
             <p className="font-serif text-[30px] leading-none font-semibold tabular-nums lining-nums">
-              {remaining === null ? "–" : i === 0 ? values[i] : String(values[i]).padStart(2, "0")}
+              {remaining === null
+                ? "–"
+                : i === 0
+                  ? values[i]
+                  : String(values[i]).padStart(2, "0")}
             </p>
             <p className="type-meta mt-2 text-[9px] tracking-[0.08em] text-ink-faint">
               {label}

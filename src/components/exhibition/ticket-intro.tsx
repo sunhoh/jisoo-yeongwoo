@@ -341,8 +341,8 @@ export function TicketIntro({
               <span className="type-meta">Free</span>
             </div>
 
-            <span aria-hidden className="holo-foil" />
-            <span aria-hidden className="holo-glitter" />
+            {/* <span aria-hidden className="holo-foil" /> */}
+            {/* <span aria-hidden className="holo-glitter" /> */}
             <span aria-hidden className="holo-glare" />
           </div>
         </div>

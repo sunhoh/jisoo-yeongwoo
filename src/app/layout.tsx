@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <Toaster />
-        <StarShower />
+        {/* <StarShower /> */}
       </body>
     </html>
   );

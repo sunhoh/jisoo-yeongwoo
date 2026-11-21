@@ -40,3 +40,23 @@ export function monogramDate(iso: string) {
     time: `${p.weekday} ${p.hour}:${p.minute} ${p.dayPeriod}`.toUpperCase(),
   };
 }
+
+/** 본문 표기: "27년 3월 27일 토요일 오후 5시" (분이 있으면 "오후 5시 30분") */
+export function koreanDateTime(iso: string) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      year: "2-digit",
+      month: "numeric",
+      day: "numeric",
+      weekday: "long",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    })
+      .formatToParts(new Date(iso))
+      .map((x) => [x.type, x.value]),
+  );
+  const minute = Number(p.minute) ? ` ${Number(p.minute)}분` : "";
+  return `${p.year}년 ${p.month}월 ${p.day}일 ${p.weekday} ${p.dayPeriod} ${p.hour}시${minute}`;
+}

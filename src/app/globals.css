@@ -23,6 +23,18 @@
   /* layout */
   --container-invite: 600px;
 
+  /*
+   * spacing — 모든 초대장 디자인이 같이 쓰는 여백 단계 (메인 페이지 기준).
+   * p-*, m-*, gap-*, space-y-* 어디에나 붙는다: my-section, mt-block, mx-gutter …
+   * 사진·지도·갤러리는 좌우 여백 없이 꽉 채우고, 글·목록만 mx-gutter 를 준다.
+   */
+  --spacing-gutter: 2rem; /* 32 · 글·목록의 좌우 여백 */
+  --spacing-section: 7rem; /* 112 · 섹션 위아래 (본문 틀에 flow-root *:my-section — 이웃 섹션끼리는 마진이 겹쳐 한 번만, flow-root 가 맨 위·아래 마진이 틀 밖으로 새지 않게 붙잡는다) */
+  --spacing-block: 4rem; /* 64 · 한 섹션 안 큰 덩어리 사이 (인사말 → 사진 → 혼주) */
+  --spacing-header: 3rem; /* 48 · 섹션 제목 묶음 → 본문 */
+  --spacing-stack: 1.5rem; /* 24 · 문단·목록 항목 사이 */
+  --spacing-tight: 0.75rem; /* 12 · 제목 → 부제, 짝지은 줄 사이 */
+
   /* motion */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --animate-accordion-down: accordion-down 0.3s var(--ease-soft);
@@ -80,14 +92,6 @@
   font-size: 40px;
   line-height: 1.3;
   letter-spacing: 2px;
-}
-
-/* 섹션 내 필기체 포인트: "Party", D-day의 "D" */
-@utility type-script {
-  font-family: var(--font-script);
-  font-size: 28px;
-  line-height: 1.3;
-  letter-spacing: 1px;
 }
 
 /* 큰 영문 타이틀: "OUR, WEDDING" */

@@ -15,8 +15,6 @@ import { invitation } from "@/config/invitation";
 import { coverDate } from "@/lib/date";
 import { getGalleryImages, getImages } from "@/lib/gallery";
 
-// 전시회 컨셉 청첩장 (/exhibition). 내용은 메인과 같은 src/config/invitation.ts
-
 export const metadata: Metadata = {
   title: "The First Page — 지수 🖤 영우",
 };
@@ -25,14 +23,24 @@ const { groom, bride, venue, accounts, contacts } = invitation;
 const TITLE = "The First Page";
 
 /** 섹션 머리: 작은 영문 라벨 + 큰 한글 제목 */
-function SectionHead({ en, ko, aside }: { en: string; ko: string; aside?: string }) {
+function SectionHead({
+  en,
+  ko,
+  aside,
+}: {
+  en: string;
+  ko: string;
+  aside?: string;
+}) {
   return (
     <Reveal className="mb-10 px-8">
       <div className="flex items-baseline justify-between border-t border-ink pt-3">
         <p className="text-[10px] font-bold tracking-[0.18em] text-ink">{en}</p>
         {aside && <p className="type-meta tabular-nums">{aside}</p>}
       </div>
-      <h2 className="mt-5 text-[28px] leading-tight font-bold tracking-[-0.03em] text-ink">{ko}</h2>
+      <h2 className="mt-5 text-[28px] leading-tight font-bold tracking-[-0.03em] text-ink">
+        {ko}
+      </h2>
     </Reveal>
   );
 }
@@ -108,17 +116,25 @@ export default async function ExhibitionPage() {
           <SectionHead en="CURATOR'S NOTE" ko="전시 서문" />
           <Reveal className="space-y-6 px-8">
             {invitation.greeting.split("\n\n").map((paragraph) => (
-              <p key={paragraph} className="type-body whitespace-pre-line text-ink-soft">
+              <p
+                key={paragraph}
+                className="type-body whitespace-pre-line text-ink-soft"
+              >
                 {paragraph}
               </p>
             ))}
           </Reveal>
 
           <Reveal className="mt-12 px-8">
-            <p className="text-[10px] font-bold tracking-[0.18em] text-ink">CURATED BY</p>
+            <p className="text-[10px] font-bold tracking-[0.18em] text-ink">
+              CURATED BY
+            </p>
             <dl className="mt-3 space-y-2">
               {[groom, bride].map((p) => (
-                <div key={p.shortName} className="type-body flex items-baseline gap-3">
+                <div
+                  key={p.shortName}
+                  className="type-body flex items-baseline gap-3"
+                >
                   <dt className="text-ink-soft">{p.parents.join(" · ")}</dt>
                   <dd>
                     <span className="text-ink-soft">의 {p.relation} </span>
@@ -133,9 +149,13 @@ export default async function ExhibitionPage() {
           </Reveal>
         </section>
 
-        {/* 작품 */}
+        {/* 갤러리 */}
         <section>
-          <SectionHead en="WORKS" ko="작품" aside={`${gallery.length} works`} />
+          <SectionHead
+            en="WORKS"
+            ko="갤러리"
+            aside={`${gallery.length} works`}
+          />
           <ArtworkWall images={gallery} year={year} />
         </section>
 
@@ -153,7 +173,9 @@ export default async function ExhibitionPage() {
                   <dt className="w-24 shrink-0 text-[11px] font-bold tracking-[0.12em] text-ink">
                     {k}
                   </dt>
-                  <dd className="type-body-sm text-ink-soft tabular-nums">{v}</dd>
+                  <dd className="type-body-sm text-ink-soft tabular-nums">
+                    {v}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -196,14 +218,20 @@ export default async function ExhibitionPage() {
           <p className="text-[clamp(44px,13vw,72px)] leading-none font-bold tracking-[-0.05em] text-ink uppercase">
             Exit
           </p>
-          <p className="type-label mt-3 text-ink-soft">Thank you for visiting.</p>
+          <p className="type-label mt-3 text-ink-soft">
+            Thank you for visiting.
+          </p>
           <div className="mt-10 flex justify-center">
             <Share />
           </div>
         </section>
       </div>
 
-      <DevEasterEggs bride={bride.en} groom={groom.en} date={invitation.date.slice(0, 10)} />
+      <DevEasterEggs
+        bride={bride.en}
+        groom={groom.en}
+        date={invitation.date.slice(0, 10)}
+      />
     </>
   );
 }

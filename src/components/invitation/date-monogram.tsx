@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  * 큰 연회색 "03/27" 숫자 위에 필기체 "27 March"를 겹치고, 아래에 연도와 시간을 둔 날짜 모노그램.
  */
 export function DateMonogram({ date, className }: { date: string; className?: string }) {
-  const { month, day, script, year, time } = monogramDate(date);
+  const { month, day, script, time } = monogramDate(date);
 
   return (
     <div className={cn("flex flex-col items-center select-none", className)}>

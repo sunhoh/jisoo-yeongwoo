@@ -14,7 +14,9 @@ export function SectionHeading({
   className?: string;
 }) {
   return (
-    <div className={`flex flex-col items-center gap-2 text-center ${className}`}>
+    <div
+      className={`flex flex-col items-center gap-2 text-center ${className}`}
+    >
       {ornament && (
         <span aria-hidden className="flex leading-none text-ink">
           {ornament}
@@ -38,9 +40,7 @@ export function CaptionRow({
   className?: string;
 }) {
   return (
-    <div
-      className={`type-caption grid grid-cols-3 items-center ${className}`}
-    >
+    <div className={`type-caption grid grid-cols-3 items-center ${className}`}>
       <span className="text-left">{left}</span>
       <span className="text-center uppercase">{center}</span>
       <span className="text-right uppercase">{right}</span>
@@ -50,21 +50,7 @@ export function CaptionRow({
 
 /** 얇은 구분선 */
 export function Rule({ className = "", ...props }: ComponentProps<"hr">) {
-  return <hr className={`border-0 border-t border-line ${className}`} {...props} />;
-}
-
-/** 라벨-값 한 줄 (교통 안내, 계좌 등) */
-export function InfoRow({
-  label,
-  children,
-}: {
-  label: ReactNode;
-  children: ReactNode;
-}) {
   return (
-    <div className="flex gap-4 py-3">
-      <dt className="type-body-sm w-20 shrink-0 font-medium text-ink">{label}</dt>
-      <dd className="type-body-sm text-ink-soft">{children}</dd>
-    </div>
+    <hr className={`border-0 border-t border-line ${className}`} {...props} />
   );
 }
