@@ -222,10 +222,8 @@ function Sticker({
         animateTo(PEEL_IDLE)
       }
       onKeyDown={(e) => {
-        e.stopPropagation(); // 스페이스가 화면 쪽 키 처리로 새지 않게
         if (e.key === "Enter" || e.key === " ") finish();
       }}
-      onClick={(e) => e.stopPropagation()} // 벗기는 동작이 끝난 뒤 스스로 연다
       className="absolute top-1/2 left-1/2 z-10 touch-none select-none"
       style={{
         transform: opening
@@ -293,7 +291,7 @@ function Sticker({
 /**
  * 인트로: 화면을 통째로 덮은 반투명 봉투 너머로 카드가 비치고, 가운데 분홍 스티커를 누르면
  * 스티커가 떨어지고 → 봉투가 제자리에서 스르르 사라져 카드만 남는다.
- * 스티커 말고 화면 아무 데나 누르거나 아래로 스크롤해도 열린다. 여는 동작은 배경음악 시작도 겸한다.
+ * 스티커로만 열린다 (스크롤·화면 탭으로는 안 열림). 여는 동작은 배경음악 시작도 겸한다.
  * 열린 뒤 맨 위로 다시 올라오면 봉투가 다시 덮이고 스티커도 새로 붙는다.
  */
 export function EnvelopeIntro(props: Props) {
@@ -318,52 +316,28 @@ export function EnvelopeIntro(props: Props) {
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  // 화면 아무 데나 눌러도 열린다. 스티커를 벗겨 연 경우엔 Sticker가 이미 음악을 시작했다
-  const openByTap = () => {
-    if (done.current) return;
-    startBgm();
-    open();
-  };
-
-  // 닫혀 있을 땐 아래로 스크롤하려 하면 열리고, 열린 뒤엔 맨 위에서 더 위로 올리려 하면 다시 덮인다 (휠·스와이프·키)
+  // 열린 뒤 맨 위에서 더 위로 올리려 하면 다시 덮인다 (휠·스와이프·키). 닫혀 있을 땐 스티커로만 열린다
   useEffect(() => {
-    if (state === "opening") return;
-    const sealed = state === "sealed";
+    if (state !== "open") return;
     const atTop = () => window.scrollY <= 0;
     let touchY = 0;
-    let swiped = false;
     let leftTop = !atTop();
 
     const onWheel = (e: WheelEvent) => {
-      if (sealed && e.deltaY > 0) open();
-      else if (!sealed && e.deltaY < 0 && atTop()) seal();
+      if (e.deltaY < 0 && atTop()) seal();
     };
     const onTouchStart = (e: TouchEvent) => {
       touchY = e.touches[0].clientY;
     };
     const onTouchMove = (e: TouchEvent) => {
       const dy = touchY - e.touches[0].clientY; // 위로 쓸면 +
-      if (sealed && dy > 24) {
-        swiped = true;
-        open();
-      } else if (!sealed && dy < -24 && atTop()) seal();
+      if (dy < -24 && atTop()) seal();
     };
-    // 스와이프(touchmove)는 브라우저가 소리 재생을 허락하는 동작이 아니라 손을 뗄 때 음악을 시작한다
-    const onTouchEnd = () => swiped && startBgm();
     const onKey = (e: KeyboardEvent) => {
-      if (sealed && ["ArrowDown", "PageDown", " ", "End"].includes(e.key)) {
-        startBgm();
-        open();
-      } else if (
-        !sealed &&
-        ["ArrowUp", "PageUp", "Home"].includes(e.key) &&
-        atTop()
-      )
-        seal();
+      if (["ArrowUp", "PageUp", "Home"].includes(e.key) && atTop()) seal();
     };
     // 아래로 내려갔다가 스크롤로 맨 위까지 돌아오면 덮인다
     const onScroll = () => {
-      if (sealed) return;
       if (!atTop()) leftTop = true;
       else if (leftTop) seal();
     };
@@ -371,14 +345,12 @@ export function EnvelopeIntro(props: Props) {
     window.addEventListener("wheel", onWheel, { passive: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("touchend", onTouchEnd);
     window.addEventListener("keydown", onKey);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("scroll", onScroll);
     };
@@ -397,10 +369,7 @@ export function EnvelopeIntro(props: Props) {
   const opening = state !== "sealed";
 
   return (
-    <section
-      onClick={state === "sealed" ? openByTap : undefined}
-      className={`relative flex h-dvh flex-col items-center justify-center overflow-hidden px-6 ${state === "sealed" ? "cursor-pointer" : ""}`}
-    >
+    <section className="relative flex h-svh flex-col items-center justify-center overflow-hidden px-6">
       <InvitationCard {...props} />
       {/* 다시 덮일 수 있어 봉투는 늘 두고 투명도로만 숨긴다 */}
       <Vellum opening={opening} />
