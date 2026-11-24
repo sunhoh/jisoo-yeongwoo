@@ -49,7 +49,7 @@ export function Deco({
       aria-hidden
       width={width}
       height={height}
-      sizes="(max-width: 440px) 60vw, 260px"
+      sizes="(max-width: 600px) 60vw, 260px"
       priority={priority}
       draggable={false}
       className={`pointer-events-none h-auto select-none ${wiggle ? "block w-full" : className}`}

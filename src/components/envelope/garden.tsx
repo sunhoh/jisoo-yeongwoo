@@ -14,7 +14,7 @@ export function Garden({ crop = 580 }: { crop?: number }) {
         aria-hidden
         width={1774}
         height={701}
-        sizes="(max-width: 440px) 100vw, 440px"
+        sizes="(max-width: 600px) 100vw, 600px"
         draggable={false}
         className="pointer-events-none block w-full select-none"
         style={{ filter: PAPER_SHADOW }}

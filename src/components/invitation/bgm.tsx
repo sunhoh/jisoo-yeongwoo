@@ -24,7 +24,8 @@ export function Bgm({ src }: { src: string }) {
 
   const play = () => {
     const el = audio.current;
-    if (!el) return;
+    // 이미 재생 중이면(봉투를 다시 열 때) 볼륨을 다시 0부터 올리지 않는다
+    if (!el || !el.paused) return;
     // 볼륨을 0에서 천천히 올린다 (iOS는 볼륨 조절이 막혀 있어 바로 원래 크기로 나온다)
     el.volume = 0;
     const started = performance.now();

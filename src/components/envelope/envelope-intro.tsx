@@ -7,6 +7,9 @@ import { CARD_WIDTH, STICKER_SCALE } from "./sticker-size";
 import type { GalleryImage } from "@/lib/gallery";
 
 const OPEN = 1100; // 스티커가 떨어지고 봉투가 다 사라질 때까지
+const RESEAL_GRACE = 400; // 열린 직후 이 시간 동안은 다시 덮지 않는다
+const WHEEL_GAP = 200; // 휠 이벤트 사이가 이만큼 비면 새 동작
+const RESEAL_PULL = 24; // 맨 위에서 이만큼(px) 더 올리려 해야 덮인다
 
 type Props = {
   date: string;
@@ -23,7 +26,7 @@ function InvitationCard({ date, names, art }: Props) {
         alt=""
         fill
         priority
-        sizes="(max-width: 440px) 100vw, 440px"
+        sizes="(max-width: 600px) 100vw, 600px"
         placeholder="blur"
         blurDataURL={art.blurDataURL}
         // className="object-cover grayscale contrast-[1.05]"
@@ -32,10 +35,11 @@ function InvitationCard({ date, names, art }: Props) {
       {/* 글씨가 읽히도록 아래쪽만 살짝 어둡게 */}
       <div className="absolute inset-x-0 bottom-0 h-[32%] bg-gradient-to-t from-black/45 to-transparent" />
       <div className="absolute inset-x-0 bottom-[7%] flex flex-col items-center text-white">
-        <p className="font-[family-name:var(--font-pen)] text-[clamp(15px,4vw,19px)] tracking-[0.12em] tabular-nums">
+        {/* 날짜·이름 모두 매거진 제목과 같은 Cormorant Garamond 이탤릭. 숫자는 매거진 캡션처럼 높이를 맞춘 lining 숫자 */}
+        <p className="font-serif text-[clamp(15px,4vw,19px)] font-medium tracking-[0.12em] italic lining-nums tabular-nums">
           {date}
         </p>
-        <p className="font-[family-name:var(--font-pen)] text-[clamp(24px,7vw,32px)] leading-tight font-semibold">
+        <p className="font-serif text-[clamp(24px,7vw,32px)] leading-tight font-medium italic">
           {names}
         </p>
       </div>
@@ -308,6 +312,7 @@ export function EnvelopeIntro(props: Props) {
   };
 
   const seal = () => {
+    if (!done.current) return; // 한 번의 동작에서 여러 이벤트가 겹쳐 와도 한 번만
     clearTimeout(timer.current);
     done.current = false;
     setRound((r) => r + 1);
@@ -316,25 +321,54 @@ export function EnvelopeIntro(props: Props) {
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
-  // 열린 뒤 맨 위에서 더 위로 올리려 하면 다시 덮인다 (휠·스와이프·키). 닫혀 있을 땐 스티커로만 열린다
+  // 열린 뒤 맨 위에서 더 위로 올리려 하면 다시 덮인다 (휠·스와이프·키). 닫혀 있을 땐 스티커로만 열린다.
+  // 열기 전부터 이어지던 동작(트랙패드 관성 스크롤, 화면에 대고 있던 손가락)으로는 다시 덮이지 않도록
+  // 열린 뒤 잠깐 기다렸다가, 그 뒤에 새로 시작한 동작만 센다.
   useEffect(() => {
     if (state !== "open") return;
     const atTop = () => window.scrollY <= 0;
-    let touchY = 0;
+    const armedAt = performance.now() + RESEAL_GRACE;
+    const armed = () => performance.now() >= armedAt;
     let leftTop = !atTop();
 
+    // 휠: 이벤트 사이가 WHEEL_GAP 넘게 비면 새 동작으로 본다. 관성 스크롤은 쉬지 않고 이어져서 걸러진다
+    let lastWheel = -Infinity;
+    let wheelFresh = false;
+    let wheelUp = 0;
     const onWheel = (e: WheelEvent) => {
-      if (e.deltaY < 0 && atTop()) seal();
+      const now = performance.now();
+      if (now - lastWheel > WHEEL_GAP) {
+        wheelFresh = armed();
+        wheelUp = 0;
+      }
+      lastWheel = now;
+      if (!wheelFresh || !atTop()) return;
+      wheelUp = e.deltaY < 0 ? wheelUp - e.deltaY : 0;
+      if (wheelUp > RESEAL_PULL) seal();
     };
+
+    // 터치: 열린 뒤에 새로 댄 손가락만 센다
+    let touchY: number | null = null;
     const onTouchStart = (e: TouchEvent) => {
-      touchY = e.touches[0].clientY;
+      touchY = armed() ? e.touches[0].clientY : null;
     };
     const onTouchMove = (e: TouchEvent) => {
-      const dy = touchY - e.touches[0].clientY; // 위로 쓸면 +
-      if (dy < -24 && atTop()) seal();
+      if (touchY === null) return;
+      const dy = e.touches[0].clientY - touchY; // 아래로 끌어내리면 +
+      if (dy > RESEAL_PULL && atTop()) seal();
     };
+    const onTouchEnd = () => {
+      touchY = null;
+    };
+
     const onKey = (e: KeyboardEvent) => {
-      if (["ArrowUp", "PageUp", "Home"].includes(e.key) && atTop()) seal();
+      if (
+        armed() &&
+        !e.repeat &&
+        ["ArrowUp", "PageUp", "Home"].includes(e.key) &&
+        atTop()
+      )
+        seal();
     };
     // 아래로 내려갔다가 스크롤로 맨 위까지 돌아오면 덮인다
     const onScroll = () => {
@@ -345,21 +379,37 @@ export function EnvelopeIntro(props: Props) {
     window.addEventListener("wheel", onWheel, { passive: true });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    window.addEventListener("touchcancel", onTouchEnd, { passive: true });
     window.addEventListener("keydown", onKey);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("scroll", onScroll);
     };
   }, [state]);
 
-  // 봉투가 닫혀 있는 동안 스크롤 잠금
+  // 새로고침하면 브라우저가 이전 스크롤 위치(맨 아래 등)로 되돌려 놓는데, 봉투는 닫힌 채 스크롤만 잠겨
+  // 스티커가 화면 밖에 있어 아무것도 못 하게 된다. 이 페이지에선 위치 복원을 끄고 늘 봉투부터 보여준다
+  useEffect(() => {
+    const prev = history.scrollRestoration;
+    history.scrollRestoration = "manual";
+    window.scrollTo(0, 0);
+    return () => {
+      history.scrollRestoration = prev;
+    };
+  }, []);
+
+  // 봉투가 닫혀 있는 동안 스크롤 잠금. 잠그기 전에 맨 위(봉투)로 올려 둔다
   useEffect(() => {
     if (state === "open") return;
     const html = document.documentElement;
+    if (window.scrollY > 0) window.scrollTo(0, 0);
     html.style.overflow = "hidden";
     return () => {
       html.style.overflow = "";

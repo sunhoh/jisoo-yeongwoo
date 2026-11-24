@@ -7,10 +7,9 @@ const PAPER = "#faf9f6";
 
 // 종이 기둥 바깥(데스크톱 양옆·고무줄 스크롤 여백)은 무늬 없는 거의 흰 미색
 const OUTSIDE = "#f7f7f5";
-// 종이 기둥은 휴대폰 한 화면 폭으로 좁히고, 양옆에 옅은 그림자를 둔다
+// 종이 기둥 폭은 다른 페이지와 같은 레이아웃 폭(max-w-invite)을 그대로 쓰고, 양옆에 옅은 그림자만 둔다
 const COLUMN = {
   background: PAPER,
-  maxWidth: "440px",
   boxShadow: "0 0 36px rgb(60 55 45 / 0.08)",
 };
 

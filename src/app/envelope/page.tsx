@@ -22,10 +22,10 @@ import { Reveal } from "@/components/ui/reveal";
 import { invitation } from "@/config/invitation";
 import { koreanDateTime } from "@/lib/date";
 import { getGalleryImages, getImages } from "@/lib/gallery";
-import { hand, handKo, pen } from "./fonts";
+import { handKo } from "./fonts";
 
 export const metadata: Metadata = {
-  title: "We Said Yes — 지수 🖤 영우",
+  title: "지수 🤍 영우",
 };
 
 const INTRO_PHOTO = "/IMG_4107.jpg"; // 인트로 카드 사진
@@ -43,11 +43,12 @@ const GREETING = [
 자리를 빛내주시면 감사하겠습니다.`,
 ];
 
-/** 손글씨 제목 + 물결 밑줄 */
+/** 섹션 제목 (매거진과 같은 세리프 이탤릭) + 물결 밑줄 */
 function HandTitle({ children }: { children: string }) {
   return (
     <div className="mb-header flex flex-col items-center">
-      <h2 className="font-[family-name:var(--font-hand)] text-[32px] leading-none font-bold tracking-[0.04em] text-[#1b1b1b] uppercase">
+      {/* 매거진 섹션 제목(type-heading)과 같은 Cormorant Garamond 이탤릭 */}
+      <h2 className="font-serif text-[24px] leading-tight font-medium tracking-[0.02em] text-[#1b1b1b] uppercase italic">
         {children}
       </h2>
       <DoodleUnderline className="mt-1 h-2.5 w-28 text-[#ad2329]" />
@@ -97,9 +98,7 @@ export default async function EnvelopePage() {
   const names = `${bride.en[0].toUpperCase()}${bride.en.slice(1)} & ${groom.en[0].toUpperCase()}${groom.en.slice(1)}`;
 
   return (
-    <PaperPage
-      className={`${hand.variable} ${pen.variable} ${handKo.variable}`}
-    >
+    <PaperPage className={handKo.variable}>
       <Bgm src={invitation.bgm} />
 
       {/* 1. 봉투 인트로 → 카드 */}
@@ -119,7 +118,7 @@ export default async function EnvelopePage() {
               alt=""
               width={cake.width}
               height={cake.height}
-              sizes="(max-width: 440px) 80vw, 340px"
+              sizes="(max-width: 600px) 80vw, 340px"
               placeholder="blur"
               blurDataURL={cake.blurDataURL}
               className="aspect-3/3.5 w-full origin-bottom rotate-[2.5deg] object-fill"
@@ -156,7 +155,7 @@ export default async function EnvelopePage() {
                 src={art.src}
                 alt=""
                 fill
-                sizes="(max-width: 440px) 50vw, 220px"
+                sizes="(max-width: 600px) 50vw, 300px"
                 placeholder="blur"
                 blurDataURL={art.blurDataURL}
                 className="object-cover"
@@ -241,7 +240,7 @@ export default async function EnvelopePage() {
           <div style={{ width: STICKER_WIDTH }}>
             <SpringHeart rotate={-8} />
           </div>
-          <p className="font-[family-name:var(--font-pen)] text-2xl text-[#3a3a3a]/70">
+          <p className="font-serif text-2xl font-medium text-[#3a3a3a]/70 italic">
             {names}
           </p>
           <div className="mt-2">

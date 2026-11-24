@@ -11,6 +11,11 @@ const SPRING = 420; // 제자리로 튕겨 돌아오는 탄성
 const DAMP = 11; // 출렁임이 잦아드는 정도 (작을수록 오래 출렁)
 const GRAVITY = 1300; // 튀긴 조각이 떨어지는 힘(px/s²)
 const COLORS = ["#c8424f", "#efc6cc", "#f3ead9", "#b9cde6"];
+// 하트가 처음 화면에 들어오면 한 번 스스로 당겼다 놓아 "당길 수 있다"는 걸 보여준다
+const DEMO_DELAY = 0; // 하트가 보이는 즉시 당기기 시작
+const DEMO_PULL = 220; // 당기는 데 걸리는 시간
+const DEMO_HOLD = 30; // 당긴 채로 잠깐 버티는 시간
+const DEMO_TO: Vec = { x: 0, y: 62 }; // 정확히 아래로 당긴다 → 반대쪽인 정확히 위로 튄다
 
 type Vec = { x: number; y: number };
 type Bit = {
@@ -37,10 +42,14 @@ export function SpringHeart({ rotate = 0 }: { rotate?: number }) {
   const bits = useRef<Bit[]>([]);
   const frame = useRef(0);
   const running = useRef(false);
+  const demo = useRef(0); // 시연 중인 rAF/타이머. 사용자가 잡으면 바로 멈춘다
+  const demoTimer = useRef(0);
 
   useEffect(
     () => () => {
       cancelAnimationFrame(frame.current);
+      cancelAnimationFrame(demo.current);
+      clearTimeout(demoTimer.current);
       bits.current.forEach((b) => b.el.remove());
     },
     [],
@@ -133,10 +142,41 @@ export function SpringHeart({ rotate = 0 }: { rotate?: number }) {
     }
   };
 
+  const stopDemo = () => {
+    cancelAnimationFrame(demo.current);
+    clearTimeout(demoTimer.current);
+    demo.current = 0;
+  };
+
+  // 사람이 당기듯 천천히 늘였다가 잠깐 버티고 놓는다. 놓은 뒤는 실제로 놓을 때와 똑같이 튕긴다
+  const playDemo = () => {
+    if (drag.current || reducedMotion()) return;
+    let started = 0; // 첫 프레임 시각에서 시작
+    const step = (now: number) => {
+      started ||= now;
+      const t = Math.min(1, (now - started) / DEMO_PULL);
+      const e = 1 - (1 - t) ** 3; // 처음엔 빠르게, 끝으로 갈수록 버티듯 느리게
+      pos.current = { x: DEMO_TO.x * e, y: DEMO_TO.y * e };
+      paint();
+      if (t < 1) {
+        demo.current = requestAnimationFrame(step);
+        return;
+      }
+      demoTimer.current = window.setTimeout(() => {
+        demo.current = 0;
+        vel.current = { x: 0, y: 0 };
+        spray({ ...pos.current });
+        loop();
+      }, DEMO_HOLD);
+    };
+    demo.current = requestAnimationFrame(step);
+  };
+
   const reducedMotion = () =>
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    stopDemo();
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = {
       start: { x: e.clientX - pos.current.x, y: e.clientY - pos.current.y },
@@ -170,6 +210,24 @@ export function SpringHeart({ rotate = 0 }: { rotate?: number }) {
     }
     loop();
   };
+
+  // 하트 끝이 화면에 걸리는 순간 한 번만 시연한다 (섹션이 아니라 하트 기준)
+  useEffect(() => {
+    const el = heart.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        demoTimer.current = window.setTimeout(playDemo, DEMO_DELAY);
+      },
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+    // 처음 한 번만 걸면 된다 (playDemo 는 ref 만 쓴다)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative z-20 w-full touch-none select-none">
